@@ -2,6 +2,7 @@ import newrelic
 from celery import Task
 
 from h.celery import celery, get_task_logger
+from h.models import Job
 
 log = get_task_logger(__name__)
 
@@ -52,6 +53,10 @@ def report_job_queue_metrics():
 
     newrelic.agent.record_custom_metrics(
         [
+            (
+                "Custom/SyncAnnotations/Queue/Length",
+                celery.request.db.query(Job).count(),
+            ),
             (
                 "Custom/SyncAnnotations/Queue/API/Length",
                 queue.count(["storage.create_annotation", "storage.update_annotation"]),
